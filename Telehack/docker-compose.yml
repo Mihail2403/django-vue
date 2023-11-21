@@ -24,6 +24,8 @@ services:
       - django-static:/backend/static
     ports:
       - 8000:8000
+    depends_on:
+      - pgdb
     networks:
       net:
         ipv4_address: 192.168.89.102
@@ -33,7 +35,8 @@ services:
     build:
       context: ./frontend
     command: sh -c "
-      npm run build
+      npm install @vue/cli-plugin-eslint
+      && npm run build
       && http-server dist -p 80"
     volumes:
       - ./frontend:/frontend
@@ -44,6 +47,23 @@ services:
         ipv4_address: 192.168.89.103
     depends_on:
       - backend
+      - pgdb
+
+  pgdb:
+    image: postgres:16
+    expose:
+      - '5432'
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    restart: always
+    networks:
+      net:
+        ipv4_address: 192.168.89.104
+    volumes:
+      - pgdbdata:/var/lib/postgresql/data/
 
 volumes:
   django-static:
+  pgdbdata:
